@@ -1,51 +1,65 @@
 # zabbix-azure-vm-install-guide
-Hosting Zabbix server on Azure VM
+
+## Hosting Zabbix server on Azure VM
 Within this project we will hosting a Zabbix server on an Azure Virtual Machine so that we can monitor network performance on a home network.
 
 First step is to create the Azure Virtual Machine, which will be running a version of Linux server.
 In order to host a VM we will need to create a Virtual Network in Azure. This will allow the VM to have an IP address assigned, through which it can communicate with the Zabbix Agents on the home network later. 
 
-
-# Creating the Virtual Machine.
+### Creating the Virtual Machine.
 
 First step with Azure services is to create a resoruce group that will contain a virtual network and the VM itself.
 Create a resource group for our project: 
-```az group create -l southeastasia --resource-group zabbixserver ```
+```bash
+az group create -l southeastasia --resource-group zabbixserver 
+```
 * Change the location accordingly, you can get a list of available ones using "az account list-locations".
 
 Create a default VNet:
-```az network vnet create --resource-group zabbixserver --name default_vnet -l southeastasia```
-
+```bash
+az network vnet create --resource-group zabbixserver --name default_vnet -l southeastasia
+```
 Create VM running Ubuntu Server: 
-```vmname="ZabbixServer" username="Zabbix" az vm create --resource-group zabbixserver -n ZabbixServer --image Ubuntu2204 --public-ip-sku Standard --admin-username zabbixadmin --generate-ssh-keys ```
+```bash
+vmname="ZabbixServer" username="Zabbix" az vm create --resource-group zabbixserver -n ZabbixServer --image Ubuntu2204 --public-ip-sku Standard --admin-username zabbixadmin --generate-ssh-keys
+```
 *This will also create an SSH login for us and the respective SSH keys.
 
 We will need the public IP of our VM to SSH into it: 
-```az vm list-ip-addresses -g zabbixserver -n ZabbixServer```
+```bash
+az vm list-ip-addresses -g zabbixserver -n ZabbixServer
+```
 Then we SSH to the VM: 
-``` ssh zabbixadmin@[VM public IP]```
+```bash
+ssh zabbixadmin@[VM public IP]
+```
 
 
 
-Installing Zabbix components and setting up the Server.
+## Installing Zabbix components and setting up the Server.
 
 Steps on how to install Zabbix components. For my case, using an image of Ubuntu 22.04 LTS: 
+```bash
 # wget https://repo.zabbix.com/zabbix/6.4/ubuntu/pool/main/z/zabbix-release/zabbix-release_6.4-1+ubuntu22.04_all.deb
 # dpkg -i zabbix-release_6.4-1+ubuntu22.04_all.deb
 # apt update
 # apt install zabbix-server-mysql zabbix-frontend-php zabbix-apache-conf zabbix-sql-scripts zabbix-agent
+```
 
 Once this is done we should install MySQL Server on our machine, and assign it an admin account:
+```bash
 # apt install mysql-server
 # systemctl start mysql
 # mysql
 # create database zabbixserverdb character set utf8mb4 collate utf8mb4_bin;
 # create user dbadmin@localhost identified by 'password';
+```
 *Replace password with a safe and secure password. 
+```bash
 # grant all privileges on zabbixserverdb.* to dbadmin@localhost;
 # set global log_bin_trust_function_creators = 1;
 # quit;
-
+```
 Next, we need to import the database schema that our SQL database will use, from the zabbix-sql-scripts, like so:
 # zcat /usr/share/zabbix-sql-scripts/mysql/server.sql.gz | mysql --default-character-set=utf8mb4 -udbadmin -p zabbixserverdb
 
