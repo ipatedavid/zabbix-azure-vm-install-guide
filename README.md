@@ -50,7 +50,7 @@ Once this is done we should install MySQL Server on our machine, and assign it a
 ```bash
 apt install mysql-server
 systemctl start mysql
-mysql
+sudo mysql
 mysql> create database zabbixserverdb character set utf8mb4 collate utf8mb4_bin;
 mysql> create user dbadmin@localhost identified by 'password';
 ```
@@ -77,16 +77,16 @@ Now we should configure the zabbix-server.conf file to reflect all our database 
 
 Now that we have our database ready, we can start the apache web server and add it for the start-up processes:
 ```bash
-# systemctl restart zabbix-server zabbix-agent apache2
-# systemctl enable zabbix-server zabbix-agent apache2
+sudo systemctl restart zabbix-server zabbix-agent apache2
+sudo systemctl enable zabbix-server zabbix-agent apache2
 ```
 All that is left to do is to open port 80 on our VM so that we can access the Zabbix web front from our home network. 
 ```bash
-$ az vm open-port -n ZabbixServer -g zabbixserver --port 80
+az vm open-port -n ZabbixServer -g zabbixserver --port 80
 ```
 You can also update the rule to allow a specific source IP to access port 80 for added security:
 ```bash
-$ az network nsg rule update --resource-group zabbixserver --nsg-name zabbixserverNSG --name open-port-80 --source-address-prefixes [your home network IP]
+az network nsg rule update --resource-group zabbixserver --nsg-name zabbixserverNSG --name open-port-80 --source-address-prefixes [your home network IP]
 ```
 __Open the web UI at HTTP:// [hostIP] /zabbix and go through the set-up steps.__
 
@@ -95,25 +95,25 @@ __Open the web UI at HTTP:// [hostIP] /zabbix and go through the set-up steps.__
 
 Install instructions can be found on the Zabbix download page and they are similar to the server installation, even simpler. Run the following commands:
 ```bash
-# wget https://repo.zabbix.com/zabbix/7.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_7.0-1+ubuntu22.04_all.deb
-# dpkg -i zabbix-release_7.0-1+ubuntu22.04_all.deb
-# apt update
-# apt install zabbix-agent
+wget https://repo.zabbix.com/zabbix/7.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_7.0-1+ubuntu22.04_all.deb
+dpkg -i zabbix-release_7.0-1+ubuntu22.04_all.deb
+apt update
+apt install zabbix-agent
 ```
 And to start and enable the agent daemon at system startup: 
 ```bash
-# systemctl restart zabbix-agent
-# systemctl enable zabbix-agent 
+sudo systemctl restart zabbix-agent
+sudo systemctl enable zabbix-agent 
 ```
 I've chosen to secure the connection between server and agent with a pre-shared key PSK.
 Creating PSK file in zabbix folder of the agent host:
 ```bash
-# sudo -i
-# openssl rand -hex 32 > /etc/zabbix/PSK001.psk
+sudo -i
+openssl rand -hex 32 > /etc/zabbix/PSK001.psk
 ```
 Open the agent config file on the monitored host and edit the following:
 ```bash
-# nano /etc/zabbix/zabbix_agentd.conf
+nano /etc/zabbix/zabbix_agentd.conf
 ```
 - Server=[IP of VM] 
 - HostName=Agent001
@@ -130,12 +130,12 @@ __Additional firewall settings should be considered for this to work.
 Make sure that you have port-forwarding on your router is set-up for port 10050 to the agent machine.
 And allow communication to port 10050 on the agent host machine firewall.__
 ```bash
-# ufw enable
-# ufw allow 10050 
+sudo ufw enable
+sudo ufw allow 10050 
 ```
 You can check the results of the Uncomplicated Firewall command with:
 ```bash
-# netstat -lutn | grep 10050
+sudo netstat -lutn | grep 10050
 ```
 Our new rule should look something like this:
 |Proto|	Recv. 	|Send	 |Local Addr.		  |Foreign Addr. |   State  |
@@ -156,12 +156,12 @@ For the active agent set-up you will need to change the following in the zabbix_
 
 You will also need to open port 10051 on the VM so the agent can communicate to the server, using:
 ```bash
-$ az vm open-port -n ZabbixServer -g zabbixserver --port 10051 --priority 899
+az vm open-port -n ZabbixServer -g zabbixserver --port 10051 --priority 899
 ```
 
 2. Originally I have created the VM with too low specs, this resulted in the zabbix server crashing. Be aware of your VM specifications before install. In my case I had to resize the VM with:
 ```bash
-$ az vm resize \
+az vm resize \
     --resource-group "zabbixserver" \
     --name ZabbixServer \
     --size Standard_DS2_v2   
@@ -169,7 +169,7 @@ $ az vm resize \
 
 To check the connection you can run zabbix_get commands from the server host:
 ```bash
-# zabbix_get -s agentIP -p 10050 -k agent.version
+zabbix_get -s agentIP -p 10050 -k agent.version
 ```
 During my troubleshooting I got either:
 - zabbix_get [3589]: Get value error: cannot connect to [[x.x.x.x]:10050]: [111] Connection refused.
