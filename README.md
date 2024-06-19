@@ -6,24 +6,24 @@ First step is to create the Azure Virtual Machine, which will be running a versi
 In order to host a VM we will need to create a Virtual Network in Azure. This will allow the VM to have an IP address assigned, through which it can communicate with the Zabbix Agents on the home network later. 
 
 
-Creating the Virtual Machine.
+# Creating the Virtual Machine.
 
 First step with Azure services is to create a resoruce group that will contain a virtual network and the VM itself.
 Create a resource group for our project: 
-# az group create -l southeastasia --resource-group zabbixserver 
+```az group create -l southeastasia --resource-group zabbixserver ```
 * Change the location accordingly, you can get a list of available ones using "az account list-locations".
 
 Create a default VNet:
-# az network vnet create --resource-group zabbixserver --name default_vnet -l southeastasia
+```az network vnet create --resource-group zabbixserver --name default_vnet -l southeastasia```
 
 Create VM running Ubuntu Server: 
-# vmname="ZabbixServer" username="Zabbix" az vm create --resource-group zabbixserver -n ZabbixServer --image Ubuntu2204 --public-ip-sku Standard --admin-username zabbixadmin --generate-ssh-keys 
+```vmname="ZabbixServer" username="Zabbix" az vm create --resource-group zabbixserver -n ZabbixServer --image Ubuntu2204 --public-ip-sku Standard --admin-username zabbixadmin --generate-ssh-keys ```
 *This will also create an SSH login for us and the respective SSH keys.
 
 We will need the public IP of our VM to SSH into it: 
-# az vm list-ip-addresses -g zabbixserver -n ZabbixServer
+```az vm list-ip-addresses -g zabbixserver -n ZabbixServer```
 Then we SSH to the VM: 
-# ssh zabbixadmin@[VM public IP]
+``` ssh zabbixadmin@[VM public IP]```
 
 
 
