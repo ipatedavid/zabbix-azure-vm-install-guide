@@ -62,17 +62,17 @@ mysql> quit;
 ```
 Next, we need to import the database schema that our SQL database will use, from the zabbix-sql-scripts, like so:
 ```bash
-# zcat /usr/share/zabbix-sql-scripts/mysql/server.sql.gz | mysql --default-character-set=utf8mb4 -udbadmin -p zabbixserverdb
+zcat /usr/share/zabbix-sql-scripts/mysql/server.sql.gz | mysql --default-character-set=utf8mb4 -udbadmin -p zabbixserverdb
 ```
 Once that is done, we can remove the log_bin_trust_function_creators = 1:
 ```bash
-# sudo mysql
+sudo mysql
 mysql> set global log_bin_trust_function_creators = 0;
 mysql> quit;
 ```
 Now we should configure the zabbix-server.conf file to reflect all our database details, database name, user and password. Remember to change the default values if needed, for example, DBName should be "zabbixserverdb" in this case.
 ```bash
-# nano /etc/zabbix/zabbix_server.conf
+nano /etc/zabbix/zabbix_server.conf
 ```
 
 Now that we have our database ready, we can start the apache web server and add it for the start-up processes:
