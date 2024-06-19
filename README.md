@@ -11,27 +11,27 @@ In order to host a VM we will need to create a Virtual Network in Azure. This wi
 First step with Azure services is to create a resoruce group that will contain a virtual network and the VM itself.
 Create a resource group for our project: 
 ```bash
-$ az group create -l southeastasia --resource-group zabbixserver 
+az group create -l southeastasia --resource-group zabbixserver 
 ```
 Change the location accordingly, you can get a list of available ones using "az account list-locations".
 
 Create a default VNet:
 ```bash
-$ az network vnet create --resource-group zabbixserver --name default_vnet -l southeastasia
+az network vnet create --resource-group zabbixserver --name default_vnet -l southeastasia
 ```
 Create VM running Ubuntu Server: 
 ```bash
-$ az vmname="ZabbixServer" username="Zabbix" az vm create --resource-group zabbixserver -n ZabbixServer --image Ubuntu2204 --public-ip-sku Standard --admin-username zabbixadmin --generate-ssh-keys
+az vmname="ZabbixServer" username="Zabbix" az vm create --resource-group zabbixserver -n ZabbixServer --image Ubuntu2204 --public-ip-sku Standard --admin-username zabbixadmin --generate-ssh-keys
 ```
 This will also create an SSH login for us and the respective SSH keys.
 
 We will need the public IP of our VM to SSH into it: 
 ```bash
-$ az vm list-ip-addresses -g zabbixserver -n ZabbixServer
+az vm list-ip-addresses -g zabbixserver -n ZabbixServer
 ```
 Then we SSH to the VM: 
 ```bash
-# ssh zabbixadmin@[VM public IP]
+ssh zabbixadmin@[VM public IP]
 ```
 
 
@@ -40,17 +40,17 @@ Then we SSH to the VM:
 
 Steps on how to install Zabbix components. For my case, using an image of Ubuntu 22.04 LTS: 
 ```bash
-# wget https://repo.zabbix.com/zabbix/6.4/ubuntu/pool/main/z/zabbix-release/zabbix-release_6.4-1+ubuntu22.04_all.deb
-# dpkg -i zabbix-release_6.4-1+ubuntu22.04_all.deb
-# apt update
-# apt install zabbix-server-mysql zabbix-frontend-php zabbix-apache-conf zabbix-sql-scripts zabbix-agent
+wget https://repo.zabbix.com/zabbix/6.4/ubuntu/pool/main/z/zabbix-release/zabbix-release_6.4-1+ubuntu22.04_all.deb
+dpkg -i zabbix-release_6.4-1+ubuntu22.04_all.deb
+apt update
+apt install zabbix-server-mysql zabbix-frontend-php zabbix-apache-conf zabbix-sql-scripts zabbix-agent
 ```
 
 Once this is done we should install MySQL Server on our machine, and assign it an admin account:
 ```bash
-# apt install mysql-server
-# systemctl start mysql
-# mysql
+apt install mysql-server
+systemctl start mysql
+mysql
 mysql> create database zabbixserverdb character set utf8mb4 collate utf8mb4_bin;
 mysql> create user dbadmin@localhost identified by 'password';
 ```
