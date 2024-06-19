@@ -11,27 +11,27 @@ In order to host a VM we will need to create a Virtual Network in Azure. This wi
 First step with Azure services is to create a resoruce group that will contain a virtual network and the VM itself.
 Create a resource group for our project: 
 ```bash
-az group create -l southeastasia --resource-group zabbixserver 
+$ az group create -l southeastasia --resource-group zabbixserver 
 ```
 Change the location accordingly, you can get a list of available ones using "az account list-locations".
 
 Create a default VNet:
 ```bash
-az network vnet create --resource-group zabbixserver --name default_vnet -l southeastasia
+$ az network vnet create --resource-group zabbixserver --name default_vnet -l southeastasia
 ```
 Create VM running Ubuntu Server: 
 ```bash
-vmname="ZabbixServer" username="Zabbix" az vm create --resource-group zabbixserver -n ZabbixServer --image Ubuntu2204 --public-ip-sku Standard --admin-username zabbixadmin --generate-ssh-keys
+$ az vmname="ZabbixServer" username="Zabbix" az vm create --resource-group zabbixserver -n ZabbixServer --image Ubuntu2204 --public-ip-sku Standard --admin-username zabbixadmin --generate-ssh-keys
 ```
 This will also create an SSH login for us and the respective SSH keys.
 
 We will need the public IP of our VM to SSH into it: 
 ```bash
-az vm list-ip-addresses -g zabbixserver -n ZabbixServer
+$ az vm list-ip-addresses -g zabbixserver -n ZabbixServer
 ```
 Then we SSH to the VM: 
 ```bash
-ssh zabbixadmin@[VM public IP]
+# ssh zabbixadmin@[VM public IP]
 ```
 
 
@@ -51,14 +51,14 @@ Once this is done we should install MySQL Server on our machine, and assign it a
 # apt install mysql-server
 # systemctl start mysql
 # mysql
-# create database zabbixserverdb character set utf8mb4 collate utf8mb4_bin;
-# create user dbadmin@localhost identified by 'password';
+mysql> create database zabbixserverdb character set utf8mb4 collate utf8mb4_bin;
+mysql> create user dbadmin@localhost identified by 'password';
 ```
 Replace password with a safe and secure password. 
 ```bash
-# grant all privileges on zabbixserverdb.* to dbadmin@localhost;
-# set global log_bin_trust_function_creators = 1;
-# quit;
+mysql> grant all privileges on zabbixserverdb.* to dbadmin@localhost;
+mysql> set global log_bin_trust_function_creators = 1;
+mysql> quit;
 ```
 Next, we need to import the database schema that our SQL database will use, from the zabbix-sql-scripts, like so:
 ```bash
@@ -82,13 +82,13 @@ Now that we have our database ready, we can start the apache web server and add 
 ```
 All that is left to do is to open port 80 on our VM so that we can access the Zabbix web front from our home network. 
 ```bash
-# az vm open-port -n ZabbixServer -g zabbixserver --port 80
+$ az vm open-port -n ZabbixServer -g zabbixserver --port 80
 ```
 You can also update the rule to allow a specific source IP to access port 80 for added security:
 ```bash
-# az network nsg rule update --resource-group zabbixserver --nsg-name zabbixserverNSG --name open-port-80 --source-address-prefixes [your home network IP]
+$ az network nsg rule update --resource-group zabbixserver --nsg-name zabbixserverNSG --name open-port-80 --source-address-prefixes [your home network IP]
 ```
-Open the web UI at HTTP://[hostIP]/zabbix and go through the set-up steps.
+__Open the web UI at HTTP:// [hostIP] /zabbix and go through the set-up steps.__
 
 
 ## Setting up the Zabbix agent.
@@ -139,6 +139,7 @@ You can check the results of the Uncomplicated Firewall command with:
 ```
 Our new rule should look something like this:
 |Proto|	Recv. 	|Send	 |Local Addr.		  |Foreign Addr. |   State  |
+|-----|--------|------|---------------|--------------|----------|
 |tcp  |      0 |     0|  0.0.0.0:10050|  0.0.0.0:*   |   LISTEN |    
 |tcp6 |      0 |     0|  :::10050     |  :::*        |   LISTEN |    
 
@@ -155,12 +156,12 @@ For the active agent set-up you will need to change the following in the zabbix_
 
 You will also need to open port 10051 on the VM so the agent can communicate to the server, using:
 ```bash
-# az vm open-port -n ZabbixServer -g zabbixserver --port 10051 --priority 899
+$ az vm open-port -n ZabbixServer -g zabbixserver --port 10051 --priority 899
 ```
 
 2. Originally I have created the VM with too low specs, this resulted in the zabbix server crashing. Be aware of your VM specifications before install. In my case I had to resize the VM with:
 ```bash
-# az vm resize \
+$ az vm resize \
     --resource-group "zabbixserver" \
     --name ZabbixServer \
     --size Standard_DS2_v2   
