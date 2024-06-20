@@ -3,17 +3,16 @@
 ## Hosting Zabbix server on Azure VM
 Within this project we will hosting a Zabbix server on an Azure Virtual Machine so that we can monitor network performance on a home network.
 
+### Creating the Virtual Machine.
+
 First step is to create the Azure Virtual Machine, which will be running a version of Linux server.
 In order to host a VM we will need to create a Virtual Network in Azure. This will allow the VM to have an IP address assigned, through which it can communicate with the Zabbix Agents on the home network later. 
 
-### Creating the Virtual Machine.
-
-First step with Azure services is to create a resoruce group that will contain a virtual network and the VM itself.
-Create a resource group for our project: 
+To create a resoruce group that will contain the virtual network and the VM itself:
 ```bash
 az group create -l southeastasia --resource-group zabbixserver 
 ```
-Change the location accordingly, you can get a list of available ones using "az account list-locations".
+Change the location accordingly, you can get a list of available ones using __"az account list-locations"__.
 
 Create a default VNet:
 ```bash
