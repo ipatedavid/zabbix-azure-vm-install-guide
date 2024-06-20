@@ -174,6 +174,7 @@ zabbix_get -s agentIP -p 10050 -k agent.version
 During my troubleshooting I got either:
 - zabbix_get [3589]: Get value error: cannot connect to [[x.x.x.x]:10050]: [111] Connection refused.
 - zabbix_get [3624]: Timeout while executing operation.
-This was even if all the configurations were set accordingly, which prompted me to check if my agent is behind a double NAT, which it was indeed the configuration of my ISP.
+
+This was even if all the configuration files were set accordingly, which prompted me to check if my agent was behind a double NAT, which it was indeed the configuration my ISP was using.
 
 Hope this helped someone, it is by far a practical ideea for home network monitoring, because of the VMs added cost. It was a good learning experience however.
